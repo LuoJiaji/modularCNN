@@ -2,7 +2,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.datasets import mnist
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.layers import Input, Flatten, Dense, Dropout, Lambda
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
@@ -53,20 +53,23 @@ model = Model(input_data, x)
 #model.compile(optimizer='rmsprop', loss='mse', metrics=['accuracy'])
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
+for i in range(10):
+    for it in range(5000):
+        x_batch, y_batch = get_random_batch(x_train, y_train, i, 256)
+        x_batch = np.expand_dims(x_batch, axis = 3)
+        train_loss, train_acc = model.train_on_batch(x_batch, y_batch)
+        if it % 100 == 0:
+            print('i:', i, 'it:', it, 'loss', train_loss, 'acc', train_acc)
+    model.save('./models/ModularCNN_' + str(i) + '.h5')
 
-for i in range(5000):
-    x_batch, y_batch = get_random_batch(x_train, y_train, 0, 256)
-    x_batch = np.expand_dims(x_batch, axis = 3)
-    train_loss, train_acc = model.train_on_batch(x_batch, y_batch)
-    print(i, train_loss, train_acc)
-    
-test_label = np.copy(y_test)
-test_label[np.where(y_test == 0)] = 1
-test_label[np.where(y_test != 0)] = 0  
-x_test = np.expand_dims(x_test, axis = 3)
-pre = model.predict(x_test)
-pre = pre[:,0]
-pre[np.where(pre < 0.2)] = 0
-pre[np.where(pre >= 0.2)] = 1
-
-acc = np.mean(pre == test_label)
+#model = load_model('./models/ModularCNN_0.h5')
+#test_label = np.copy(y_test)
+#test_label[np.where(y_test == 0)] = 1
+#test_label[np.where(y_test != 0)] = 0  
+#x_test = np.expand_dims(x_test, axis = 3)
+#pre = model.predict(x_test)
+#pre = pre[:,0]
+#pre[np.where(pre < 0.2)] = 0
+#pre[np.where(pre >= 0.2)] = 1
+#
+#acc = np.mean(pre == test_label)
