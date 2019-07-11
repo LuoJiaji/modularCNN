@@ -2,11 +2,13 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.datasets import mnist
+from keras.preprocessing import image
 from keras.models import Model, load_model
 from keras.layers import Input, Flatten, Dense, Dropout, Lambda
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras.optimizers import RMSprop, SGD
+from keras.utils.vis_utils import plot_model
 
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -95,6 +97,8 @@ acc = np.mean(pre == test_label)
 
 
 
+
+
 # 整合模型,综合测试
 input_shape = (28,28,1)
 input_data = Input(shape=input_shape)
@@ -126,9 +130,33 @@ model = Model(inputs = input_data,
               outputs=[output_0, output_1, output_2, output_3, output_4,
                        output_5, output_6, output_7, output_8, output_9])
 
+#plot_model(model, to_file='./models_visualization/modularCNN.pdf',show_shapes=True)
+#plot_model(model, to_file='./models_visualization/modularCNN.png',show_shapes=True)
+
+
 pre = model.predict(x_test)
 pre = np.array(pre)
 pre = np.squeeze(pre)
 pre = pre.T
 pre = np.argmax(pre, axis = 1)
 acc = np.mean(pre == y_test)
+
+
+
+## 未知数据测试
+img = image.load_img('./dataset/img/G/Q2Fsdmlub0hhbmQudHRm.png', target_size=(28, 28))
+img = image.img_to_array(img)
+img = img/255
+img = img[:,:,0]
+plt.imshow(img)
+img = np.expand_dims(img, axis=0)
+img = np.expand_dims(img, axis=3)
+
+pre = model.predict(img)
+pre = np.array(pre)
+pre = np.squeeze(pre)
+
+img_rand = np.random.rand(1,28,28,1)
+pre = model.predict(img)
+pre = np.array(pre)
+pre = np.squeeze(pre)
