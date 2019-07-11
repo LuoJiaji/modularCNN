@@ -77,6 +77,7 @@ for i in range(10):
             print('i:', i, 'it:', it, 'loss', train_loss, 'acc', train_acc)
     model.save('./models/ModularCNN_' + str(i) + '.h5')
 
+# 单个模型测试
 i=9
 model = load_model('./models/ModularCNN_9.h5')
 test_label = np.copy(y_test)
@@ -91,3 +92,43 @@ pre[np.where(pre < 0.2)] = 0
 pre[np.where(pre >= 0.2)] = 1
 
 acc = np.mean(pre == test_label)
+
+
+
+# 整合模型,综合测试
+input_shape = (28,28,1)
+input_data = Input(shape=input_shape)
+
+model_0 = load_model('./models/ModularCNN_0.h5')
+model_1 = load_model('./models/ModularCNN_1.h5')
+model_2 = load_model('./models/ModularCNN_2.h5')
+model_3 = load_model('./models/ModularCNN_3.h5')
+model_4 = load_model('./models/ModularCNN_4.h5')
+model_5 = load_model('./models/ModularCNN_5.h5')
+model_6 = load_model('./models/ModularCNN_6.h5')
+model_7 = load_model('./models/ModularCNN_7.h5')
+model_8 = load_model('./models/ModularCNN_8.h5')
+model_9 = load_model('./models/ModularCNN_9.h5')
+
+output_0 = model_0(input_data)
+output_1 = model_1(input_data)
+output_2 = model_2(input_data)
+output_3 = model_3(input_data)
+output_4 = model_4(input_data)
+output_5 = model_5(input_data)
+output_6 = model_6(input_data)
+output_7 = model_7(input_data)
+output_8 = model_8(input_data)
+output_9 = model_9(input_data)
+
+
+model = Model(inputs = input_data, 
+              outputs=[output_0, output_1, output_2, output_3, output_4,
+                       output_5, output_6, output_7, output_8, output_9])
+
+pre = model.predict(x_test)
+pre = np.array(pre)
+pre = np.squeeze(pre)
+pre = pre.T
+pre = np.argmax(pre, axis = 1)
+acc = np.mean(pre == y_test)
