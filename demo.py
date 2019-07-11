@@ -14,6 +14,7 @@ x_train = x_train.astype('float32')
 x_test = x_test.astype('float32')
 x_train /= 255
 x_test /= 255
+x_test = np.expand_dims(x_test, axis = 3)
 
 def get_random_batch(x, y, l, batchsize):
     ind_p = np.where(y_train == l)[0]
@@ -53,7 +54,21 @@ model = Model(input_data, x)
 #model.compile(optimizer='rmsprop', loss='mse', metrics=['accuracy'])
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
+#i=3
 for i in range(10):
+    input_shape = (28,28,1)
+    input_data = Input(shape=input_shape)
+    x = Conv2D(32, (3, 3), activation='relu', padding='same', name='block1_conv1')(input_data)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block1_pool')(x)
+    x = Conv2D(32, (3, 3), activation='relu', padding='same', name='block1_conv2')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
+    x = Flatten(name='flatten')(x)
+    x = Dense(128, activation='relu', name='fc1')(x)
+    x = Dense(1, activation='sigmoid', name='fc2')(x)
+    model = Model(input_data, x)
+    model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+    
+    
     for it in range(5000):
         x_batch, y_batch = get_random_batch(x_train, y_train, i, 256)
         x_batch = np.expand_dims(x_batch, axis = 3)
@@ -62,14 +77,17 @@ for i in range(10):
             print('i:', i, 'it:', it, 'loss', train_loss, 'acc', train_acc)
     model.save('./models/ModularCNN_' + str(i) + '.h5')
 
-#model = load_model('./models/ModularCNN_0.h5')
-#test_label = np.copy(y_test)
-#test_label[np.where(y_test == 0)] = 1
-#test_label[np.where(y_test != 0)] = 0  
+i=9
+model = load_model('./models/ModularCNN_9.h5')
+test_label = np.copy(y_test)
+test_label[np.where(y_test == i)] = 1
+test_label[np.where(y_test != i)] = 0  
+
 #x_test = np.expand_dims(x_test, axis = 3)
-#pre = model.predict(x_test)
-#pre = pre[:,0]
-#pre[np.where(pre < 0.2)] = 0
-#pre[np.where(pre >= 0.2)] = 1
-#
-#acc = np.mean(pre == test_label)
+
+pre = model.predict(x_test)
+pre = pre[:,0]
+pre[np.where(pre < 0.2)] = 0
+pre[np.where(pre >= 0.2)] = 1
+
+acc = np.mean(pre == test_label)
